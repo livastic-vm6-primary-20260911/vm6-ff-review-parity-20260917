@@ -1,20 +1,30 @@
-pull_request_rules:
-  - name: autoqueue all controlled PRs
-    conditions: []
-    actions:
-      queue:
 commands_restrictions:
   queue:
     conditions:
       - sender-permission >= write
+
 merge_queue:
   mode: serial
   max_parallel_checks: 1
+  queue_controls_comment: false
+
+scopes:
+  source:
+    files:
+      lane:
+        include:
+          - lane/**
+  barrier_files:
+    include:
+      - barrier/**
+
 queue_rules:
-  - name: default
+  - name: vm6-directmerge-261007
     batch_size: 1
-    queue_conditions: []
+    queue_conditions:
+      - title ~= ^VM6_DIRECTMERGE_
     merge_conditions:
-      - check-success = @github-actions/ff-ci
+      - check-success = @github-actions/compat-ci
     max_checks_retries: 0
-    merge_method: fast-forward
+    merge_method: merge
+    checks_timeout: null
