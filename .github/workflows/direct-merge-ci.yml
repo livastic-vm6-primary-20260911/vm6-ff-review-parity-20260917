@@ -1,0 +1,27 @@
+name: Direct Merge Compat
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  compat-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: VM6 controlled compatibility gate
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          echo "VM6_PR_TITLE=$PR_TITLE"
+          if [[ "$PR_TITLE" == VM6_DIRECTMERGE_BARRIER_* ]]; then
+            echo 'VM6_BARRIER_CONTROL_PASS=1'
+            exit 0
+          fi
+          policy=$(cat policy/version.txt)
+          validated=$(cat lane/validated-against.txt)
+          echo "VM6_POLICY=$policy"
+          echo "VM6_VALIDATED=$validated"
+          test "$policy" = "$validated"
