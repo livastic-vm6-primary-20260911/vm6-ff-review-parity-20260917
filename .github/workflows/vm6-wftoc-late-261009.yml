@@ -1,0 +1,8 @@
+name: VM6 Late Workflow Addition Canary 261009
+on:
+  workflow_dispatch:
+jobs:
+  benign:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo VM6_WFTOCTOU_LATE_SAFE_CANARY_261009
