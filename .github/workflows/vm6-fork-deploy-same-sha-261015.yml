@@ -33,7 +33,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: sha,
-              environment: 'vm6-fork-only-deploy-261015',
+              environment: 'vm6-fork-only-deploy-261015-b',
               description: 'Inert VM6 owned-fork deployment provenance discriminator',
               auto_merge: false,
               required_contexts: [],
