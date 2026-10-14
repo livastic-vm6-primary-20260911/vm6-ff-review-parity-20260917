@@ -1,0 +1,53 @@
+name: VM6 Fork-Only Deployment Provenance 20261015
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: "Exact controlled B fork PR head SHA"
+        required: true
+        type: string
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  fork-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.repository == 'livastic-vm6-primary-20260911/vm6-ff-review-parity-20260917'
+    steps:
+      - name: Publish an inert GitHub Deployment and success status in B fork only
+        uses: actions/github-script@v7
+        env:
+          VM6_HEAD_SHA: ${{ inputs.target_sha }}
+        with:
+          script: |
+            const sha = process.env.VM6_HEAD_SHA;
+            if (sha !== '6482a2ab845856ff0623523cb8f0d70f8a5c9c3e') {
+              throw new Error('Not the controlled immutable research PR head');
+            }
+            if (context.repo.owner !== 'livastic-vm6-primary-20260911' ||
+                context.repo.repo !== 'vm6-ff-review-parity-20260917') {
+              throw new Error('Refusing to deploy to any other repository');
+            }
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha,
+              environment: 'vm6-fork-only-deploy-261015',
+              description: 'Inert VM6 owned-fork deployment provenance discriminator',
+              auto_merge: false,
+              required_contexts: [],
+              transient_environment: true,
+              production_environment: false,
+            });
+            const result = await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: 'success',
+              auto_inactive: false,
+              description: 'Owned fork only, no application or cloud resources',
+            });
+            core.info('VM6_FORK_DEPLOYMENT_ID=' + deployment.data.id);
+            core.info('VM6_FORK_DEPLOYMENT_STATUS_ID=' + result.data.id);
+            core.info('VM6_FORK_DEPLOYMENT_SHA=' + sha);
